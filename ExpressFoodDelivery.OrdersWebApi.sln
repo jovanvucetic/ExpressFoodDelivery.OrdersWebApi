@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.OrdersWebApi", "ExpressFoodDelivery.OrdersWebApi\ExpressFoodDelivery.OrdersWebApi.csproj", "{98795623-A554-4274-9A76-29464A4B67E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Contracts", "ExpressFoodDelivery.Orders.Contracts\ExpressFoodDelivery.Orders.Contracts.csproj", "{946CB492-0899-4DAE-8454-5C122483717E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Core", "ExpressFoodDelivery.Orders.Core\ExpressFoodDelivery.Orders.Core.csproj", "{518183AF-57B4-491D-B8B3-BE7DCC85023A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Data.DeliveryService", "ExpressFoodDelivery.Orders.Data.DeliveryService\ExpressFoodDelivery.Orders.Data.DeliveryService.csproj", "{59C9F8B8-DE98-4B8C-973B-014215F99DC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Data.EntityFramework", "ExpressFoodDelivery.Orders.Data.EntityFramework\ExpressFoodDelivery.Orders.Data.EntityFramework.csproj", "{8C12386B-C6D6-45F1-98C5-FEE9D8F87539}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Data.PaymentService", "ExpressFoodDelivery.Orders.Data.PaymentService\ExpressFoodDelivery.Orders.Data.PaymentService.csproj", "{DC2EF61C-EE53-4E66-A65A-056525C40104}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Data.RestaurantService", "ExpressFoodDelivery.Orders.Data.RestaurantService\ExpressFoodDelivery.Orders.Data.RestaurantService.csproj", "{89FF51C1-6EF2-4E92-B57E-9901F336B618}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressFoodDelivery.Orders.Service", "ExpressFoodDelivery.Orders.Service\ExpressFoodDelivery.Orders.Service.csproj", "{C294BE8B-0BBF-47A1-8CF0-3944726EF824}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98795623-A554-4274-9A76-29464A4B67E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98795623-A554-4274-9A76-29464A4B67E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98795623-A554-4274-9A76-29464A4B67E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98795623-A554-4274-9A76-29464A4B67E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{946CB492-0899-4DAE-8454-5C122483717E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{946CB492-0899-4DAE-8454-5C122483717E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{946CB492-0899-4DAE-8454-5C122483717E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{946CB492-0899-4DAE-8454-5C122483717E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{518183AF-57B4-491D-B8B3-BE7DCC85023A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{518183AF-57B4-491D-B8B3-BE7DCC85023A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{518183AF-57B4-491D-B8B3-BE7DCC85023A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{518183AF-57B4-491D-B8B3-BE7DCC85023A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C9F8B8-DE98-4B8C-973B-014215F99DC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C9F8B8-DE98-4B8C-973B-014215F99DC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C9F8B8-DE98-4B8C-973B-014215F99DC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C9F8B8-DE98-4B8C-973B-014215F99DC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C12386B-C6D6-45F1-98C5-FEE9D8F87539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C12386B-C6D6-45F1-98C5-FEE9D8F87539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C12386B-C6D6-45F1-98C5-FEE9D8F87539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C12386B-C6D6-45F1-98C5-FEE9D8F87539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC2EF61C-EE53-4E66-A65A-056525C40104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC2EF61C-EE53-4E66-A65A-056525C40104}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC2EF61C-EE53-4E66-A65A-056525C40104}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC2EF61C-EE53-4E66-A65A-056525C40104}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89FF51C1-6EF2-4E92-B57E-9901F336B618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89FF51C1-6EF2-4E92-B57E-9901F336B618}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89FF51C1-6EF2-4E92-B57E-9901F336B618}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89FF51C1-6EF2-4E92-B57E-9901F336B618}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C294BE8B-0BBF-47A1-8CF0-3944726EF824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C294BE8B-0BBF-47A1-8CF0-3944726EF824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C294BE8B-0BBF-47A1-8CF0-3944726EF824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C294BE8B-0BBF-47A1-8CF0-3944726EF824}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4786A3A-663C-4B1F-B08F-A6B03363344E}
+	EndGlobalSection
+EndGlobal

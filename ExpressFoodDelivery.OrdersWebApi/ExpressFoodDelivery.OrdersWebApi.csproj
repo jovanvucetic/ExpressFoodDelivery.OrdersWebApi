@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Contracts\ExpressFoodDelivery.Orders.Contracts.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Core\ExpressFoodDelivery.Orders.Core.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Data.DeliveryService\ExpressFoodDelivery.Orders.Data.DeliveryService.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Data.EntityFramework\ExpressFoodDelivery.Orders.Data.EntityFramework.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Data.PaymentService\ExpressFoodDelivery.Orders.Data.PaymentService.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Data.RestaurantService\ExpressFoodDelivery.Orders.Data.RestaurantService.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Service\ExpressFoodDelivery.Orders.Service.csproj" />
+  </ItemGroup>
+
+</Project>
