@@ -29,54 +29,36 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
 
         public async Task<AcceptedOrderDetails> OrderAsync(Order orderDetails)
         {
-            ValidateOrderDetails(orderDetails);
+            if (orderDetails is null)
+                throw new InvalidOrderDetailsException();
 
-            var totalPaymentAmount = CalculateTotalPaymentAmount(orderDetails.OrderItems);
+            var price = Decimal.Zero;
+            foreach(var item in orderDetails.OrderItems)
+            {
+                price += item.ItemPrice * item.ItemCount;
+            }
 
-            await ValidatePaymentMethodAsync(orderDetails.PaymentDetails, totalPaymentAmount);
+            if (orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard)
+            {
+                var successfullyAuthorized = await _paymentRepository.AuthoriseCreditCardAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price));
+
+                if (!successfullyAuthorized)
+                {
+                    throw new CardAuthorizationException();
+                }
+            }
 
             var restaurantResponse = _restaurantRepository.CreateOrderAsync(orderDetails);
             var deliveryResponse = _deliveryRepository.CreateDeliveryAsync(orderDetails.DeliveryDetails);
-            var payment = _paymentRepository.ExecutePaymentAsync(orderDetails.PaymentDetails.ToCreditCardPayment(totalPaymentAmount));
+            var payment = _paymentRepository.ExecutePaymentAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price));
             var order = _orderRepository.CreateOrderAsync(orderDetails);
 
             await Task.WhenAll(restaurantResponse, deliveryResponse, payment, order);
 
             var orderAcceptedOn = DateTime.Now;
-            var estimatedDeliveryTime = CalculateEstimatedDeliveryTime(orderAcceptedOn, restaurantResponse.Result, deliveryResponse.Result);
+            var estimatedDeliveryTime = orderAcceptedOn.AddMinutes(restaurantResponse.Result.EstimatedPreparationTimeInMinutes).AddMinutes(deliveryResponse.Result.EstimatedDeliveryTimeInMinutes);
 
             return new AcceptedOrderDetails(order.Result, orderAcceptedOn, estimatedDeliveryTime);
-        }
-
-        private DateTime CalculateEstimatedDeliveryTime(DateTime orderAcceptedOn, AcceptedKitchenResponse kitchenResponse, AcceptedDeliveryResponse deliveryResponse)
-            => orderAcceptedOn.AddMinutes(kitchenResponse.EstimatedPreparationTimeInMinutes).AddMinutes(deliveryResponse.EstimatedDeliveryTimeInMinutes);
-
-        private async Task ValidatePaymentMethodAsync(PaymentDetails paymentDetails, decimal totalPaymentAmount)
-        {
-            if (paymentDetails.PaymentMethod == PaymentMethod.Cash)
-            {
-                return;
-            }
-
-            var successfullyAuthorized = await _paymentRepository.AuthoriseCreditCardAsync(paymentDetails.ToCreditCardPayment(totalPaymentAmount));
-
-            if (!successfullyAuthorized)
-            {
-                throw new CardAuthorizationException();
-            }
-        }
-
-        private decimal CalculateTotalPaymentAmount(IEnumerable<OrderItem> orderItems)
-        {
-            var totalOrderFee = orderItems.Sum(item => item.ItemPrice * item.ItemCount);
-
-            return totalOrderFee + FixedDeliveryFee;
-        }
-
-        private void ValidateOrderDetails(Order orderDetails)
-        {
-            if (orderDetails is null)
-                throw new InvalidOrderDetailsException();
         }
     }
 }
