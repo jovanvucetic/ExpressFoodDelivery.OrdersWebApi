@@ -8,9 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="coverlet.collector" Version="3.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Core\ExpressFoodDelivery.Orders.Core.csproj" />
+    <ProjectReference Include="..\ExpressFoodDelivery.Orders.Service\ExpressFoodDelivery.Orders.Service.csproj" />
   </ItemGroup>
 
 </Project>

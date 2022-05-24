@@ -6,12 +6,12 @@ namespace ExpressFoodDelivery.Orders.Data.PaymentService
 {
     public class PaymentRepository : IPaymentRepository
     {
-        public Task<bool> AuthoriseCreditCardAsync(CreditCardPayment payment)
+        public Task<bool> AuthoriseCreditCardAsync(CreditCardPaymentDetails payment)
         {
             return Task.FromResult(true);
         }
 
-        public Task ExecutePaymentAsync(CreditCardPayment payment)
+        public Task ExecutePaymentAsync(CreditCardPaymentDetails payment)
         {
             return Task.CompletedTask;
         }

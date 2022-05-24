@@ -5,8 +5,8 @@ namespace ExpressFoodDelivery.Orders.Core.Interfaces.Repositories
 {
     public interface IPaymentRepository
     {
-        Task ExecutePaymentAsync(CreditCardPayment payment);
+        Task ExecutePaymentAsync(CreditCardPaymentDetails payment);
 
-        Task<bool> AuthoriseCreditCardAsync(CreditCardPayment payment);
+        Task<bool> AuthoriseCreditCardAsync(CreditCardPaymentDetails payment);
     }
 }

@@ -12,7 +12,7 @@
             CardNumber = cardNumber;
         }
 
-        public CreditCardPayment ToCreditCardPayment(decimal amount) =>
-            new CreditCardPayment(amount, CardNumber);
+        public CreditCardPaymentDetails ToCreditCardPayment(decimal amount) =>
+            new CreditCardPaymentDetails(amount, CardNumber);
     }
 }
