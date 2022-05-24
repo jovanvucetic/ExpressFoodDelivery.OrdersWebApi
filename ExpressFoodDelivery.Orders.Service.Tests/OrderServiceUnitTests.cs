@@ -14,12 +14,9 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
         [Test]
         public void OrderAsync_OrderDetailsObjectIsNull_InvalidOrderDetailsExceptionThrown()
         {
-            var deliveryRepository = Substitute.For<IDeliveryRepository>();
-            var paymentRepository = Substitute.For<IPaymentRepository>();
-            var restaurantRepository = Substitute.For<IRestaurantRepository>();
-            var orderRepository = Substitute.For<IOrderRepository>();
+            var testContext = new OrderServiceTestContext();
 
-            var targetService = new OrderService(deliveryRepository, paymentRepository, restaurantRepository, orderRepository);
+            var targetService = testContext.CreateTarget();
 
             Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(null));
         }
@@ -29,15 +26,133 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
         {
             var orderDetails = GetOrderDetails();
 
-            var deliveryRepository = Substitute.For<IDeliveryRepository>();
-            var paymentRepository = Substitute.For<IPaymentRepository>();
-            paymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(false);
-            var restaurantRepository = Substitute.For<IRestaurantRepository>();
-            var orderRepository = Substitute.For<IOrderRepository>();
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(false);
 
-            var targetService = new OrderService(deliveryRepository, paymentRepository, restaurantRepository, orderRepository);
+            var targetService = testContext.CreateTarget();
 
             Assert.ThrowsAsync<CardAuthorizationException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_DeliveryDetailsNotProvided_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(), "Pizza", 1, 349.99M) };
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, "4242-4242-4242-4242");
+            var orderDetails = new Order(orderItems, null, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_PaymentDetailsNotProvided_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(), "Pizza", 1, 349.99M) };
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var orderDetails = new Order(orderItems, deliveryDetails, null);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_PaymentDetailsInvalid_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(), "Pizza", 1, 349.99M) };
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, string.Empty);
+            var orderDetails = new Order(orderItems, deliveryDetails, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_OrderItemsNotProvided_InvalidOrderDetailsExceptionThrown()
+        {
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, "4242-4242-4242-4242");
+            var orderDetails = new Order(null, deliveryDetails, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_OrderItemsCollectionIsEmpty_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = Array.Empty<OrderItem>();
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, "4242-4242-4242-4242");
+            var orderDetails = new Order(orderItems, deliveryDetails, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_OrderItemCollectionContainsNull_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(), "Pizza", 1, 349.99M), null };
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, "4242-4242-4242-4242");
+            var orderDetails = new Order(orderItems, deliveryDetails, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
+        }
+
+        [Test]
+        public void OrderAsync_OrderItemHasZeroCount_InvalidOrderDetailsExceptionThrown()
+        {
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(), "Pizza", 0, 349.99M) };
+            var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
+            var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
+            var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
+            var paymentDetails = new PaymentDetails(PaymentMethod.CreditCard, "4242-4242-4242-4242");
+            var orderDetails = new Order(orderItems, deliveryDetails, paymentDetails);
+
+            var testContext = new OrderServiceTestContext();
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+
+            var targetService = testContext.CreateTarget();
+
+            Assert.ThrowsAsync<InvalidOrderDetailsException>(() => targetService.OrderAsync(orderDetails));
         }
 
         [Test]
@@ -48,16 +163,13 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
             var acceptedDeliveryResponse = new AcceptedDeliveryResponse { EstimatedDeliveryTimeInMinutes = 15 };
             var expectedOrderId = Guid.NewGuid();
 
-            var deliveryRepository = Substitute.For<IDeliveryRepository>();
-            deliveryRepository.CreateDeliveryAsync(orderDetails.DeliveryDetails).Returns(Task.FromResult(acceptedDeliveryResponse));
-            var paymentRepository = Substitute.For<IPaymentRepository>();
-            paymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
-            var restaurantRepository = Substitute.For<IRestaurantRepository>();
-            restaurantRepository.CreateOrderAsync(orderDetails).Returns(Task.FromResult(acceptedKitchenResponse));
-            var orderRepository = Substitute.For<IOrderRepository>();
-            orderRepository.CreateOrderAsync(orderDetails).Returns(expectedOrderId);
+            var testContext = new OrderServiceTestContext();
+            testContext.DeliveryRepository.CreateDeliveryAsync(orderDetails.DeliveryDetails).Returns(Task.FromResult(acceptedDeliveryResponse));
+            testContext.PaymentRepository.AuthoriseCreditCardAsync(Arg.Any<CreditCardPaymentDetails>()).Returns(true);
+            testContext.RestaurantRepository.CreateOrderAsync(orderDetails).Returns(Task.FromResult(acceptedKitchenResponse));
+            testContext.OrderRepository.CreateOrderAsync(orderDetails).Returns(expectedOrderId);
 
-            var targetService = new OrderService(deliveryRepository, paymentRepository, restaurantRepository, orderRepository);
+            var targetService = testContext.CreateTarget();
 
             var result = await targetService.OrderAsync(orderDetails);
 
@@ -68,7 +180,7 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
 
         private Order GetOrderDetails()
         {
-            var orderItems = new[] { new OrderItem(Guid.NewGuid(), 1, 349.99M) };
+            var orderItems = new[] { new OrderItem(Guid.NewGuid(),"Pizza", 1, 349.99M) };
             var pickupAddress = new Address("Diagon Alley", string.Empty, "London", string.Empty, "UK");
             var deliveryAddress = new Address("221b Baker Street", string.Empty, "London", string.Empty, "UK");
             var deliveryDetails = new DeliveryDetails(pickupAddress, deliveryAddress);
@@ -78,12 +190,12 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
 
         private class OrderServiceTestContext
         {
-            internal IDeliveryRepository DeliveryRepository { get; }
-            internal IPaymentRepository PaymentRepository { get; }
-            internal IRestaurantRepository RestaurantRepository { get; }
-            internal IOrderRepository OrderRepository { get; }
+            public IDeliveryRepository DeliveryRepository { get; }
+            public IPaymentRepository PaymentRepository { get; }
+            public IRestaurantRepository RestaurantRepository { get; }
+            public IOrderRepository OrderRepository { get; }
 
-            internal OrderServiceTestContext()
+            public OrderServiceTestContext()
             {
                 DeliveryRepository = Substitute.For<IDeliveryRepository>();
                 PaymentRepository = Substitute.For<IPaymentRepository>();
@@ -91,7 +203,7 @@ namespace ExpressFoodDelivery.Orders.Service.Tests
                 OrderRepository = Substitute.For<IOrderRepository>();
             }
 
-            internal OrderService CreateTarget()
+            public OrderService CreateTarget()
                 => new OrderService(DeliveryRepository, PaymentRepository, RestaurantRepository, OrderRepository);
         }
     }

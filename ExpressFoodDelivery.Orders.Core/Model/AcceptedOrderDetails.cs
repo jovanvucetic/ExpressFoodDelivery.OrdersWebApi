@@ -10,11 +10,14 @@ namespace ExpressFoodDelivery.Orders.Core.Model
 
         public DateTime DeliveryExpectedOn { get; }
 
-        public AcceptedOrderDetails(Guid orderId, DateTime orderAcceptedOn, DateTime deliveryExpectedOn)
+        public string OrderedItemsSummary { get; }
+
+        public AcceptedOrderDetails(Guid orderId, DateTime orderAcceptedOn, DateTime deliveryExpectedOn, string orderedItemsSummary)
         {
             OrderId = orderId;
             OrderAcceptedOn = orderAcceptedOn;
             DeliveryExpectedOn = deliveryExpectedOn;
+            OrderedItemsSummary = orderedItemsSummary;
         }
     }
 }

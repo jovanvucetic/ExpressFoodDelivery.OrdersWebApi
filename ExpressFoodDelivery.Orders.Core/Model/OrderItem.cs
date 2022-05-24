@@ -6,15 +6,18 @@ namespace ExpressFoodDelivery.Orders.Core.Model
     {
         public Guid MenuItemId { get; }
 
-        public int ItemCount { get; }
+        public string Name { get; set; }
 
-        public decimal ItemPrice { get; }
+        public int Count { get; }
 
-        public OrderItem(Guid menuItemId, int itemCount, decimal itemPrice)
+        public decimal Price { get; }
+
+        public OrderItem(Guid menuItemId, string name, int count, decimal price)
         {
             MenuItemId = menuItemId;
-            ItemCount = itemCount;
-            ItemPrice = itemPrice;
+            Name = name;
+            Count = count;
+            Price = price;
         }
     }
 }

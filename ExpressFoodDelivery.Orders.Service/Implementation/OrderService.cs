@@ -4,14 +4,13 @@ using ExpressFoodDelivery.Orders.Core.Interfaces.Services;
 using ExpressFoodDelivery.Orders.Core.Model;
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ExpressFoodDelivery.Orders.Service.Implementation
 {
     public class OrderService : IOrderService
     {
-        private const decimal DefaultDeliveryPrice = 199.99M;
-
         private readonly IDeliveryRepository _deliveryRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IRestaurantRepository _restaurantRepository;
@@ -33,32 +32,61 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
                 throw new InvalidOrderDetailsException("Order details object cannot be null");
             }
 
-            var fullDeliveryPrice = orderDetails.OrderItems.Sum(item => item.ItemPrice * item.ItemCount) + DefaultDeliveryPrice;
-
-            if (orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard)
+            if (orderDetails.DeliveryDetails is null)
             {
-                var isCreditCardAuthorized = await _paymentRepository.AuthoriseCreditCardAsync(
-                    orderDetails.PaymentDetails.ToCreditCardPayment(fullDeliveryPrice));
+                throw new InvalidOrderDetailsException("Delivery details object cannot be null");
+            }
 
-                if (!isCreditCardAuthorized)
+            if (orderDetails.PaymentDetails is null || orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && string.IsNullOrEmpty(orderDetails.PaymentDetails.CardNumber))
+            {
+                throw new InvalidOrderDetailsException("Payment details are not valid");
+            }
+
+            if (orderDetails.OrderItems is null || orderDetails.OrderItems.Count() == 0)
+            {
+                throw new InvalidOrderDetailsException("Order items must be defined");
+            }
+
+            foreach (var item in orderDetails.OrderItems)
+            {
+                if (item is null || item.Count <= 0)
                 {
-                    throw new CardAuthorizationException();
+                    throw new InvalidOrderDetailsException("Order item count must be higher than 0");
                 }
+            }
+
+            var price = 0M;
+            foreach (var item in orderDetails.OrderItems)
+            {
+                price += item.Price * item.Count;
+            }
+
+            //Adding delivery fee
+            price += 199.99M;
+
+            if (orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && !await _paymentRepository.AuthoriseCreditCardAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price)))
+            {
+                throw new CardAuthorizationException();
             }
 
             var restaurantResponseTask = _restaurantRepository.CreateOrderAsync(orderDetails);
             var deliveryResponseTask = _deliveryRepository.CreateDeliveryAsync(orderDetails.DeliveryDetails);
-            var paymentTask = _paymentRepository.ExecutePaymentAsync(orderDetails.PaymentDetails.ToCreditCardPayment(fullDeliveryPrice));
+            var paymentTask = _paymentRepository.ExecutePaymentAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price));
             var orderTask = _orderRepository.CreateOrderAsync(orderDetails);
 
             await Task.WhenAll(restaurantResponseTask, deliveryResponseTask, paymentTask, orderTask);
 
-            var orderConfirmedAt = DateTime.Now;
-            var estimatedDeliveryTime = orderConfirmedAt.
-                AddMinutes(restaurantResponseTask.Result.EstimatedPreparationTimeInMinutes).
-                AddMinutes(deliveryResponseTask.Result.EstimatedDeliveryTimeInMinutes);
+            var now = DateTime.Now;
+            var estimatedDeliveryTime = now.AddMinutes(restaurantResponseTask.Result.EstimatedPreparationTimeInMinutes).AddMinutes(deliveryResponseTask.Result.EstimatedDeliveryTimeInMinutes);
 
-            return new AcceptedOrderDetails(orderTask.Result, orderConfirmedAt, estimatedDeliveryTime);
+            var sb = new StringBuilder("Order summary: \n");
+            foreach (var item in orderDetails.OrderItems)
+            {
+                var str = string.Format("{0}x, {1} - {2} din\n", item.Count, item.Name, item.Count * item.Price);
+                sb.Append(str);
+            }
+
+            return new AcceptedOrderDetails(orderTask.Result, now, estimatedDeliveryTime, sb.ToString());
         }
     }
 }
