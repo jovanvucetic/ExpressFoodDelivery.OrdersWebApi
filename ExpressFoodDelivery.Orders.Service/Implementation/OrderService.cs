@@ -25,68 +25,76 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
             _orderRepository = orderRepository;
         }
 
-        public async Task<AcceptedOrderDetails> OrderAsync(Order orderDetails)
+        public async Task<AcceptedOrderDetails> OrderAsync(Order arg1)
         {
-            if (orderDetails is null)
+            if (arg1 != null)
+            {
+                if (arg1.DeliveryDetails != null)
+                {
+                    if (arg1.PaymentDetails != null && (arg1.PaymentDetails.PaymentMethod != PaymentMethod.CreditCard || !string.IsNullOrEmpty(arg1.PaymentDetails.CardNumber)))
+                    {
+                        if (arg1.OrderItems != null && arg1.OrderItems.Count() != 0)
+                        {
+                            foreach (var item in arg1.OrderItems)
+                            {
+                                if (item is null || item.Count <= 0)
+                                {
+                                    throw new InvalidOrderDetailsException("Order item count must be higher than 0");
+                                }
+                            }
+
+                            var temp = 0M;
+                            foreach (var item in arg1.OrderItems)
+                            {
+                                temp += item.Price * item.Count;
+                            }
+
+                            //Adding delivery fee
+                            temp += 199.99M;
+
+                            if (arg1.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && !await _paymentRepository.AuthoriseCreditCardAsync(arg1.PaymentDetails.ToCreditCardPayment(temp)))
+                            {
+                                throw new CardAuthorizationException();
+                            }
+
+                            var task1 = _restaurantRepository.CreateOrderAsync(arg1);
+                            var task2 = _deliveryRepository.CreateDeliveryAsync(arg1.DeliveryDetails);
+                            var task3 = _paymentRepository.ExecutePaymentAsync(arg1.PaymentDetails.ToCreditCardPayment(temp));
+                            var task4 = _orderRepository.CreateOrderAsync(arg1);
+
+                            await Task.WhenAll(task1, task2, task3, task4);
+
+                            var now = DateTime.Now;
+                            var deliveryTime = now.AddMinutes(task1.Result.EstimatedPreparationTimeInMinutes).AddMinutes(task2.Result.EstimatedDeliveryTimeInMinutes);
+
+                            var sb = new StringBuilder("Order summary: \n");
+                            foreach (var item in arg1.OrderItems)
+                            {
+                                var str = string.Format("{0}x, {1} - {2} din\n", item.Count, item.Name, item.Count * item.Price);
+                                sb.Append(str);
+                            }
+
+                            return new AcceptedOrderDetails(task4.Result, now, deliveryTime, sb.ToString());
+                        }
+                        else
+                        {
+                            throw new InvalidOrderDetailsException("Order items must be defined");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOrderDetailsException("Payment details are not valid");
+                    }
+                }
+                else
+                {
+                    throw new InvalidOrderDetailsException("Delivery details object cannot be null");
+                }
+            }
+            else
             {
                 throw new InvalidOrderDetailsException("Order details object cannot be null");
             }
-
-            if (orderDetails.DeliveryDetails is null)
-            {
-                throw new InvalidOrderDetailsException("Delivery details object cannot be null");
-            }
-
-            if (orderDetails.PaymentDetails is null || orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && string.IsNullOrEmpty(orderDetails.PaymentDetails.CardNumber))
-            {
-                throw new InvalidOrderDetailsException("Payment details are not valid");
-            }
-
-            if (orderDetails.OrderItems is null || orderDetails.OrderItems.Count() == 0)
-            {
-                throw new InvalidOrderDetailsException("Order items must be defined");
-            }
-
-            foreach (var item in orderDetails.OrderItems)
-            {
-                if (item is null || item.Count <= 0)
-                {
-                    throw new InvalidOrderDetailsException("Order item count must be higher than 0");
-                }
-            }
-
-            var price = 0M;
-            foreach (var item in orderDetails.OrderItems)
-            {
-                price += item.Price * item.Count;
-            }
-
-            //Adding delivery fee
-            price += 199.99M;
-
-            if (orderDetails.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && !await _paymentRepository.AuthoriseCreditCardAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price)))
-            {
-                throw new CardAuthorizationException();
-            }
-
-            var restaurantResponseTask = _restaurantRepository.CreateOrderAsync(orderDetails);
-            var deliveryResponseTask = _deliveryRepository.CreateDeliveryAsync(orderDetails.DeliveryDetails);
-            var paymentTask = _paymentRepository.ExecutePaymentAsync(orderDetails.PaymentDetails.ToCreditCardPayment(price));
-            var orderTask = _orderRepository.CreateOrderAsync(orderDetails);
-
-            await Task.WhenAll(restaurantResponseTask, deliveryResponseTask, paymentTask, orderTask);
-
-            var now = DateTime.Now;
-            var estimatedDeliveryTime = now.AddMinutes(restaurantResponseTask.Result.EstimatedPreparationTimeInMinutes).AddMinutes(deliveryResponseTask.Result.EstimatedDeliveryTimeInMinutes);
-
-            var sb = new StringBuilder("Order summary: \n");
-            foreach (var item in orderDetails.OrderItems)
-            {
-                var str = string.Format("{0}x, {1} - {2} din\n", item.Count, item.Name, item.Count * item.Price);
-                sb.Append(str);
-            }
-
-            return new AcceptedOrderDetails(orderTask.Result, now, estimatedDeliveryTime, sb.ToString());
         }
     }
 }
