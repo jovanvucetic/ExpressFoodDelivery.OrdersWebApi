@@ -52,9 +52,12 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
                             //Adding delivery fee
                             temp += 199.99M;
 
-                            if (arg1.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard && !await _paymentRepository.AuthoriseCreditCardAsync(arg1.PaymentDetails.ToCreditCardPayment(temp)))
+                            if (arg1.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard)
                             {
-                                throw new CardAuthorizationException();
+                                if (!await _paymentRepository.AuthoriseCreditCardAsync(arg1.PaymentDetails.ToCreditCardPayment(temp)))
+                                {
+                                    throw new CardAuthorizationException();
+                                }
                             }
 
                             var task1 = _restaurantRepository.CreateOrderAsync(arg1);
@@ -73,6 +76,7 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
                                 var str = string.Format("{0}x, {1} - {2} din\n", item.Count, item.Name, item.Count * item.Price);
                                 sb.Append(str);
                             }
+                            sb.Append($"Delivery price: {199.99M}");
 
                             return new AcceptedOrderDetails(task4.Result, now, deliveryTime, sb.ToString());
                         }

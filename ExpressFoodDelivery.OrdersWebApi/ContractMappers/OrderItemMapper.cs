@@ -6,6 +6,6 @@ namespace ExpressFoodDelivery.Orders.WebApi.ContractMappers
     public static class OrderItemMapper
     {
         public static CoreModels.OrderItem Map(OrderItem orderItem)
-            => new CoreModels.OrderItem(orderItem.MenuItemId, orderItem.ItemCount, orderItem.ItemPrice);
+            => new CoreModels.OrderItem(orderItem.MenuItemId, "Name", orderItem.ItemCount, orderItem.ItemPrice);
     }
 }
