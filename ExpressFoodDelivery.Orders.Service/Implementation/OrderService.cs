@@ -62,7 +62,9 @@ namespace ExpressFoodDelivery.Orders.Service.Implementation
 
                             var task1 = _restaurantRepository.CreateOrderAsync(arg1);
                             var task2 = _deliveryRepository.CreateDeliveryAsync(arg1.DeliveryDetails);
-                            var task3 = _paymentRepository.ExecutePaymentAsync(arg1.PaymentDetails.ToCreditCardPayment(temp));
+                            var task3 = arg1.PaymentDetails.PaymentMethod == PaymentMethod.CreditCard 
+                                ? _paymentRepository.ExecutePaymentAsync(arg1.PaymentDetails.ToCreditCardPayment(temp))
+                                : Task.CompletedTask;
                             var task4 = _orderRepository.CreateOrderAsync(arg1);
 
                             await Task.WhenAll(task1, task2, task3, task4);
